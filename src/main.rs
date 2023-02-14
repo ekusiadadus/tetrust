@@ -1,3 +1,5 @@
+use std::{thread, time};
+
 enum BlockKind {
     I,
     O,
@@ -59,6 +61,8 @@ fn main() {
 
     let mut pos = Position { x: 4, y: 0 };
 
+    println!("\x1b[2J\x1b[H\x1b[?25l");
+
     for _ in 0..5 {
         let mut field_buf = field;
 
@@ -72,6 +76,7 @@ fn main() {
 
         pos.y += 1;
 
+        println!("\x1b[H");
         for y in 0..21 {
             for x in 0..13 {
                 if field_buf[y][x] == 1 {
@@ -82,7 +87,8 @@ fn main() {
             }
             println!();
         }
-
-        println!();
+        thread::sleep(time::Duration::from_millis(1000));
     }
+
+    println!("\x1b[?25h");
 }
