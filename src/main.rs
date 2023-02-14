@@ -1,3 +1,32 @@
+enum BlockKind {
+    I,
+    O,
+    S,
+    Z,
+    J,
+    L,
+    T,
+}
+
+type BlockShape = [[usize; 4]; 4];
+
+const BLOCKS: [BlockShape; 7] = [
+    // I Block
+    [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+    // O Block
+    [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+    // S Block
+    [[0, 0, 0, 0], [0, 1, 1, 0], [1, 1, 0, 0], [0, 0, 0, 0]],
+    // Z Block
+    [[0, 0, 0, 0], [1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
+    // J Block
+    [[0, 0, 0, 0], [1, 1, 1, 0], [0, 0, 1, 0], [0, 0, 0, 0]],
+    // L Block
+    [[0, 0, 0, 0], [0, 0, 1, 0], [1, 1, 1, 0], [0, 0, 0, 0]],
+    // T Block
+    [[0, 0, 0, 0], [0, 1, 0, 0], [1, 1, 1, 0], [0, 0, 0, 0]],
+];
+
 fn main() {
     let field = [
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
@@ -22,15 +51,18 @@ fn main() {
         [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
     ];
-    let block = [[0, 0, 0, 0], [0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0]];
 
     let mut field_buf = field;
 
     for y in 0..4 {
         for x in 0..4 {
-            if block[y][x] == 1 {
-                field_buf[y + 8][x + 4] = 1;
-            }
+            field_buf[y + 2][x + 2] = BLOCKS[BlockKind::I as usize][y][x];
+            field_buf[y + 2][x + 7] = BLOCKS[BlockKind::O as usize][y][x];
+            field_buf[y + 6][x + 2] = BLOCKS[BlockKind::S as usize][y][x];
+            field_buf[y + 6][x + 7] = BLOCKS[BlockKind::Z as usize][y][x];
+            field_buf[y + 10][x + 2] = BLOCKS[BlockKind::J as usize][y][x];
+            field_buf[y + 10][x + 7] = BLOCKS[BlockKind::L as usize][y][x];
+            field_buf[y + 14][x + 3] = BLOCKS[BlockKind::T as usize][y][x];
         }
     }
 
