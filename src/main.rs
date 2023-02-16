@@ -87,8 +87,13 @@ fn main() {
     loop {
         let mut field_buf = field;
 
+        let new_pos = Position {
+            x: pos.x,
+            y: pos.y + 1,
+        };
+
         if !is_collision(&field, &pos, BlockKind::I) {
-            pos.y += 1;
+            pos = new_pos;
         }
 
         for y in 0..4 {
@@ -112,8 +117,37 @@ fn main() {
         }
         thread::sleep(time::Duration::from_millis(100));
         match g.getch() {
-            Ok(Key::Char('q')) => break,
-            _ => (),
+            Ok(Key::Left) => {
+                let new_pos = Position {
+                    x: pos.x - 1,
+                    y: pos.y,
+                };
+                if !is_collision(&field, &new_pos, BlockKind::I) {
+                    pos = new_pos;
+                };
+            }
+            Ok(Key::Right) => {
+                let new_pos = Position {
+                    x: pos.x + 1,
+                    y: pos.y,
+                };
+                if !is_collision(&field, &new_pos, BlockKind::I) {
+                    pos = new_pos;
+                };
+            }
+            Ok(Key::Down) => {
+                let new_pos = Position {
+                    x: pos.x,
+                    y: pos.y + 1,
+                };
+                if !is_collision(&field, &new_pos, BlockKind::I) {
+                    pos = new_pos;
+                };
+            }
+            Ok(Key::Char('q')) => {
+                break;
+            }
+            _ => {}
         }
     }
 
