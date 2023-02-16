@@ -1,17 +1,35 @@
 use getch_rs::{Getch, Key};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 use std::sync::{Arc, Mutex};
 use std::{thread, time};
+
+impl Distribution<BlockKind> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> BlockKind {
+        match rng.gen_range(0..=6) {
+            0 => BlockKind::I,
+            1 => BlockKind::O,
+            2 => BlockKind::S,
+            3 => BlockKind::Z,
+            4 => BlockKind::J,
+            5 => BlockKind::L,
+            _ => BlockKind::T,
+        }
+    }
+}
 
 const FIELD_WIDTH: usize = 11 + 2;
 const FIELD_HEIGHT: usize = 20 + 1;
 type Field = [[usize; FIELD_WIDTH]; FIELD_HEIGHT];
 
-fn draw(field: &Field, pos: &Position) {
+fn draw(field: &Field, pos: &Position, block: BlockKind) {
     let mut field_buf = field.clone();
 
     for y in 0..4 {
         for x in 0..4 {
-            if BLOCKS[BlockKind::I as usize][y][x] == 1 {
+            if BLOCKS[block as usize][y][x] == 1 {
                 field_buf[y + pos.y][x + pos.x] = 1;
             }
         }
@@ -105,35 +123,44 @@ fn main() {
     ]));
 
     let pos = Arc::new(Mutex::new(Position { x: 4, y: 0 }));
+    let block = Arc::new(Mutex::new(rand::random::<BlockKind>()));
     println!("\x1b[2J\x1b[H\x1b[?25l");
 
-    draw(&field.lock().unwrap(), &pos.lock().unwrap());
+    draw(
+        &field.lock().unwrap(),
+        &pos.lock().unwrap(),
+        *block.lock().unwrap(),
+    );
 
     {
         let pos = Arc::clone(&pos);
         let field = Arc::clone(&field);
+        let block = Arc::clone(&block);
+
         let _ = thread::spawn(move || loop {
             thread::sleep(time::Duration::from_millis(100));
             let mut pos = pos.lock().unwrap();
             let mut field = field.lock().unwrap();
+            let mut block = block.lock().unwrap();
             let new_pos = Position {
                 x: pos.x,
                 y: pos.y + 1,
             };
-            if !is_collision(&field, &new_pos, BlockKind::I) {
+            if !is_collision(&field, &new_pos, *block) {
                 *pos = new_pos;
             } else {
                 for y in 0..4 {
                     for x in 0..4 {
-                        if BLOCKS[BlockKind::I as usize][y][x] == 1 {
+                        if BLOCKS[*block as usize][y][x] == 1 {
                             field[y + pos.y][x + pos.x] = 1;
                         }
                     }
                 }
                 *pos = Position { x: 4, y: 0 };
+                *block = rand::random();
             }
 
-            draw(&field, &pos);
+            draw(&field, &pos, *block);
         });
     }
 
@@ -143,38 +170,41 @@ fn main() {
             Ok(Key::Left) => {
                 let mut pos = pos.lock().unwrap();
                 let mut field = field.lock().unwrap();
+                let mut block = block.lock().unwrap();
                 let new_pos = Position {
-                    x: pos.x - 1,
+                    x: pos.x.checked_sub(1).unwrap_or_else(|| pos.x),
                     y: pos.y,
                 };
-                if !is_collision(&field, &new_pos, BlockKind::I) {
+                if !is_collision(&field, &new_pos, *block) {
                     *pos = new_pos;
                 }
-                draw(&field, &pos);
+                draw(&field, &pos, *block);
             }
             Ok(Key::Down) => {
                 let mut pos = pos.lock().unwrap();
                 let mut field = field.lock().unwrap();
+                let mut block = block.lock().unwrap();
                 let new_pos = Position {
                     x: pos.x,
                     y: pos.y + 1,
                 };
-                if !is_collision(&field, &new_pos, BlockKind::I) {
+                if !is_collision(&field, &new_pos, *block) {
                     *pos = new_pos;
                 }
-                draw(&field, &pos);
+                draw(&field, &pos, *block);
             }
             Ok(Key::Right) => {
                 let mut pos = pos.lock().unwrap();
                 let mut field = field.lock().unwrap();
+                let mut block = block.lock().unwrap();
                 let new_pos = Position {
                     x: pos.x + 1,
                     y: pos.y,
                 };
-                if !is_collision(&field, &new_pos, BlockKind::I) {
+                if !is_collision(&field, &new_pos, *block) {
                     *pos = new_pos;
                 }
-                draw(&field, &pos);
+                draw(&field, &pos, *block);
             }
             Ok(Key::Char('q')) => {
                 println!("\x1b[?25h]");
