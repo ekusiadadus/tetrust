@@ -1,11 +1,11 @@
-use carate::block::BlockKind;
+use crate::block::BlockKind;
 
 pub const FIELD_HEIGHT: usize = 20 + 1;
 pub const FIELD_WIDTH: usize = 11 + 2;
 
-pub type FIELD = [[usize; FIELD_WIDTH]; FIELD_HEIGHT];
+pub type Field = [[usize; FIELD_WIDTH]; FIELD_HEIGHT];
 
-pub struct Positon {
+pub struct Position {
     pub x: usize,
     pub y: usize,
 }
@@ -48,7 +48,7 @@ impl Game {
                 [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
             ],
-            pos: Postition::init(),
+            pos: Position::init(),
             block: rand::random::<BlockKind>(),
         }
     }
